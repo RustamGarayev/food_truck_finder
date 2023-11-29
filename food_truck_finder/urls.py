@@ -14,9 +14,30 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+
+from rest_framework import permissions
+from rest_framework_swagger.views import get_swagger_view
+
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Food Truck Finder API",
+        default_version='v1'
+    ),
+    public=True,
+    permission_classes=[permissions.AllowAny],
+)
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include('core.urls')),
+    path('api/v1/', include('api.urls'), name='api'),
+    path('docs/', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
 ]

@@ -13,25 +13,17 @@ services:
       - CSV_FILE_PATH=./_data/food-truck-data.csv
     ports:
       - "8000:8000"
-    networks:
-      - db_app_net
 
   db:
     container_name: food_truck_finder_db
-    image: postgres:14.0-alpine
+    image: postgis/postgis
     ports:
       - "5432:5432"
     volumes:
-      - pgdb:/var/lib/postgresql/data/
+      - pgdata:/var/lib/postgresql/data/
     env_file:
       - .env.dev
-    networks:
-      - db_app_net
-
-networks:
-  db_app_net:
-    driver: bridge
 
 volumes:
-  pgdb:
+  pgdata:
   persistent_data:

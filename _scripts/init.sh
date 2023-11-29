@@ -7,6 +7,7 @@ MARKER_DIR=/persistent_data
 mkdir -p $MARKER_DIR
 
 # Run migrations
+poetry run python manage.py makemigrations  --noinput
 poetry run python manage.py migrate
 
 # Path to the marker file
