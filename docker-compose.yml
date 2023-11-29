@@ -1,0 +1,37 @@
+version: "3"
+
+services:
+  app:
+    container_name: food_truck_finder_app
+    build: .
+    command: >
+      sh -c "chmod +x ./scripts/init.sh && ./scripts/init.sh"
+    volumes:
+      - .:/app
+      - persistent_data:/persistent_data
+    environment:
+      - CSV_FILE_PATH=./data/food-truck-data.csv
+    ports:
+      - "8000:8000"
+    networks:
+      - db_app_net
+
+  db:
+    container_name: food_truck_finder_db
+    image: postgres:14.0-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdb:/var/lib/postgresql/data/
+    env_file:
+      - .env.dev
+    networks:
+      - db_app_net
+
+networks:
+  db_app_net:
+    driver: bridge
+
+volumes:
+  pgdb:
+  persistent_data:
