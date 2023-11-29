@@ -10,4 +10,4 @@ RUN pip3 install poetry
 
 RUN poetry install --no-dev
 
-COPY scripts/init.sh ./
+COPY _scripts/init.sh ./
