@@ -1,13 +1,17 @@
+from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import permissions
+
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 from core.models import FoodTruck
 from api.serializers import FoodTruckSerializer
+from api.helpers import is_valid_ip, is_valid_lat_long, get_location_from_ip
 
+from django.db.models import QuerySet
 from django.contrib.gis.geos import Point
-from django.contrib.gis.geoip2 import GeoIP2
-from geoip2.errors import AddressNotFoundError
+from django.core.exceptions import ValidationError
 
 from django.contrib.gis.db.models.functions import Distance
 
@@ -21,13 +25,23 @@ class FoodTruckListView(APIView):
     permission_classes = [permissions.AllowAny]  # TODO: change to IsAuthenticated/IsAdminUser for production
 
     @staticmethod
-    def _get_location_from_ip(ip_address: str) -> (float, float):
-        geo_ip = GeoIP2()
-        lat, lng = geo_ip.lat_lon(ip_address)
-        return lat, lng
+    def get_manual_parameters():
+        return [
+            openapi.Parameter(
+                name='current_address', in_=openapi.IN_QUERY,
+                description='Either IP address or Lat/Long separated by comma',
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                name='number_of_trucks', in_=openapi.IN_QUERY,
+                description='Limiting number for the returned response',
+                type=openapi.TYPE_INTEGER,
+                default=5
+            )
+        ]
 
     @staticmethod
-    def _find_nearby_food_trucks(latitude: float, longitude: float, number_of_food_trucks: int):
+    def _find_nearby_food_trucks(latitude: float, longitude: float, number_of_food_trucks: int) -> QuerySet[FoodTruck]:
         """
         Using Geographic Database Functions to order nearby food trucks by distance and return the top n results
         Reference: https://docs.djangoproject.com/en/4.2/ref/contrib/gis/functions/#distance
@@ -50,31 +64,39 @@ class FoodTruckListView(APIView):
             ip = request.META.get('REMOTE_ADDR')
         return ip
 
+    @swagger_auto_schema(manual_parameters=get_manual_parameters())
     def get(self, request):
         """
-        This view should return a list of certain number of nearby food trucks
-        ip_address -- IP address against which the location is determined
-        number_of_trucks -- Limiting number for the returned response
+        This view will return a list of certain number of nearby food trucks based on the user's IP address.
+        If the IP address is not provided, it will use the user's current IP address.
+        If the IP address is invalid, it will return a 400 error.
         """
         current_user_ip = self._get_client_ip(self.request)
-        # print(current_user_ip)
-        # print("************")
 
         # Allow user to pass in IP address to test from different locations
-        filter_ip = request.GET.get('ip_address', current_user_ip).strip()
+        filter_address = request.GET.get('current_address', current_user_ip).strip()
 
         number_of_trucks = request.GET.get('number_of_trucks', 5)
 
         try:
-            # Get user's lat/lgt values from the IP address
-            latitude, longitude = self._get_location_from_ip(filter_ip)
+            latitude, longitude = None, None
 
-            # Get nearby food trucks
+            if is_valid_ip(filter_address):
+                latitude, longitude = get_location_from_ip(filter_address)
+            elif ',' in filter_address and len(filter_address.split(',')) == 2:
+                lat_str, lng_str = filter_address.split(',')
+                if is_valid_lat_long(lat_str, lng_str):
+                    latitude, longitude = float(lat_str), float(lng_str)
+                else:
+                    raise ValidationError("Invalid latitude/longitude format.")
+
+            if latitude is None or longitude is None:
+                raise ValidationError("Invalid input format. Provide an IP address or latitude,longitude pair.")
+
+            # If everything is valid, return the nearby food trucks based on the latitude/longitude
             nearby_food_trucks = self._find_nearby_food_trucks(latitude, longitude, int(number_of_trucks))
 
-            # Serialize the data
             serializer = FoodTruckSerializer(nearby_food_trucks, many=True)
-
-            return Response(serializer.data)
-        except AddressNotFoundError:
-            return Response(FoodTruck.objects.none())
+            return Response(serializer.data, status=200)
+        except ValidationError as e:
+            return Response({"error": str(e)}, status=400)
