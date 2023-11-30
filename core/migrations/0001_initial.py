@@ -7,22 +7,36 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='FoodTruck',
+            name="FoodTruck",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('facility_type', models.CharField(choices=[('T', 'Truck'), ('P', 'Push Cart')], default='N/A', max_length=3)),
-                ('location_description', models.TextField()),
-                ('address', models.CharField(max_length=500)),
-                ('latitude', models.FloatField()),
-                ('longitude', models.FloatField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                (
+                    "facility_type",
+                    models.CharField(
+                        choices=[("T", "Truck"), ("P", "Push Cart")],
+                        default="N/A",
+                        max_length=3,
+                    ),
+                ),
+                ("location_description", models.TextField()),
+                ("address", models.CharField(max_length=500)),
+                ("latitude", models.FloatField()),
+                ("longitude", models.FloatField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
         ),
     ]

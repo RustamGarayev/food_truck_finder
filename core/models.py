@@ -4,8 +4,8 @@ from django.contrib.gis.db import models as gis_models
 
 
 FACILITY_TYPE = (
-    ('T', 'Truck'),
-    ('P', 'Push Cart'),
+    ("T", "Truck"),
+    ("P", "Push Cart"),
 )
 
 
@@ -16,7 +16,7 @@ class FoodTruck(models.Model):
     """
 
     name = models.CharField(max_length=255)
-    facility_type = models.CharField(choices=FACILITY_TYPE, max_length=3, default='N/A')
+    facility_type = models.CharField(choices=FACILITY_TYPE, max_length=3, default="N/A")
     location_description = models.TextField()
     address = models.CharField(max_length=500)
     latitude = models.FloatField()

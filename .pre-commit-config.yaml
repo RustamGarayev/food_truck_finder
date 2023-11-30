@@ -1,0 +1,18 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+    -   id: check-yaml
+    -   id: trailing-whitespace
+-   repo: https://github.com/psf/black
+    rev: 22.10.0
+    hooks:
+    -   id: black
+-  repo: https://github.com/pre-commit/mirrors-mypy
+   rev: 'v1.6.0'
+   hooks:
+   - id: mypy
+     language_version: python3.10
+     additional_dependencies: [ types-requests, pydantic ]
+     plugins: [ pydantic.mypy ]
+     exclude: core/migrations/

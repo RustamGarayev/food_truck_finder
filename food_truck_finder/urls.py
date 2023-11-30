@@ -26,18 +26,19 @@ from django.urls import path, include
 
 
 schema_view = get_schema_view(
-    openapi.Info(
-        title="Food Truck Finder API",
-        default_version='v1'
-    ),
+    openapi.Info(title="Food Truck Finder API", default_version="v1"),
     public=True,
     permission_classes=[permissions.AllowAny],
 )
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('core.urls')),
-    path('api/v1/', include('api.urls'), name='api'),
-    path('docs/', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
+    path("admin/", admin.site.urls),
+    path("", include("core.urls")),
+    path("api/v1/", include("api.urls"), name="api"),
+    path(
+        "docs/",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
 ]
