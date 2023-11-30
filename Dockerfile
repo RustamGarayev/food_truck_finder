@@ -4,6 +4,7 @@ ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update
 
+# Install GDAL for GeoDjango
 RUN apt-get install -y libgdal-dev
 
 RUN pip install GDAL==3.6.0

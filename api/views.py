@@ -83,7 +83,15 @@ class FoodTruckListView(APIView):
         # Allow user to pass in IP address to test from different locations
         filter_address = request.GET.get("current_address", current_user_ip).strip()
 
-        number_of_trucks = request.GET.get("number_of_trucks", 5)
+        number_of_trucks = request.GET.get("number_of_trucks", "5")
+
+        if not number_of_trucks.isdigit() or int(number_of_trucks) < 0:
+            return Response(
+                {
+                    "error": "Invalid number_of_trucks. Please provide a positive integer."
+                },
+                status=400,
+            )
 
         try:
             latitude, longitude = None, None

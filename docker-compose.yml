@@ -1,19 +1,6 @@
 version: "3"
 
 services:
-  app:
-    container_name: food_truck_finder_app
-    build: .
-    command: >
-      sh -c "chmod +x ./_scripts/init.sh && ./_scripts/init.sh"
-    volumes:
-      - .:/app
-      - persistent_data:/persistent_data
-    environment:
-      - CSV_FILE_PATH=./_data/food-truck-data.csv
-    ports:
-      - "8000:8000"
-
   db:
     container_name: food_truck_finder_db
     image: postgis/postgis
@@ -23,6 +10,28 @@ services:
       - pgdata:/var/lib/postgresql/data/
     env_file:
       - .env.dev
+    healthcheck:
+        test: ["CMD", "pg_isready", "-U", "postgres"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+
+  app:
+    container_name: food_truck_finder_app
+    build: .
+    restart: on-failure
+    command: >
+      sh -c "chmod +x ./_scripts/init.sh && ./_scripts/init.sh"
+    volumes:
+      - .:/app
+      - persistent_data:/persistent_data
+    environment:
+      - CSV_FILE_PATH=./_data/food-truck-data.csv
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   pgdata:

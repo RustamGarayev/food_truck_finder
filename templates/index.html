@@ -7,7 +7,8 @@
 </head>
 <body>
     <h1>Welcome to Awesome Food Truck Finder</h1>
-    <p>Enter the IP address to find nearby food trucks, or leave it blank to use your current IP address.</p>
+    <p>Enter the IP address or Latitude/Longitude values separated by comma to find nearby food trucks!</p>
+    <p>Too lazy?? Just leave it blank to use your current IP address.</p>
 
     <form id="food-truck-form">
         {% csrf_token %}
@@ -17,7 +18,7 @@
         <label for="number_of_trucks">Number of Trucks:</label>
         <input type="number" id="number_of_trucks" name="number_of_trucks" value="5">
 
-        <button type="submit"> Find Food Trucks</button>
+        <button type="submit">Find Food Trucks</button>
     </form>
 
     <br>
